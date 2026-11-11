@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PuffPricer — THCA Price-Per-Gram Index</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b0f17] text-slate-100 min-h-screen antialiased">
+
+  <!-- Toast Notification for 1-Click Copy -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-lg font-bold shadow-2xl text-sm pointer-events-none">
+    Copied discount code!
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- Top Bar -->
+    <header class="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-800/80 pb-6 mb-6 gap-4">
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-3xl font-black tracking-tight text-white">
+            Puff<span class="text-emerald-400">Pricer</span>
+          </h1>
+          <span class="bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] uppercase font-bold px-2 py-0.5 rounded">Pure THCA</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Unfiltered, normalized price-per-gram index across certified THCA flower vendors</p>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs">
+        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg hover:border-slate-700 transition">
+          <input type="checkbox" id="applyCoupons" class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0">
+          <span class="text-slate-300 font-medium">Apply Coupon Discounts</span>
+        </label>
+        <div id="statsBadge" class="bg-slate-900 border border-slate-800 px-3 py-2 rounded-lg text-slate-400 font-mono">
+          0 listings
+        </div>
+      </div>
+    </header>
+
+    <!-- Grade Selection Buttons with Dynamic "From $/g" -->
+    <div class="mb-6">
+      <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Shop by Grade</div>
+      <div class="flex flex-wrap gap-2" id="gradePillContainer"></div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-slate-900/80 border border-slate-800/80 p-4 rounded-xl shadow-lg grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+      
+      <!-- Keyword Search -->
+      <div class="col-span-2">
+        <label class="text-[11px] font-semibold text-slate-400 uppercase">Search Product / Vendor</label>
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="e.g. Super Boof, WNC, Arete..." 
+          class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 text-slate-200"
+        />
+      </div>
+
+      <!-- Size / Weight Tier -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-400 uppercase">Weight Tier</label>
+        <select id="weightFilter" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none">
+          <option value="ALL">All Sizes</option>
+          <option value="3.5">Eighth (3.5g)</option>
+          <option value="7">Quarter (7g)</option>
+          <option value="14">Half Oz (14g)</option>
+          <option value="28">Ounce (28g)</option>
+          <option value="113.4">1/4 LB (113g)</option>
+          <option value="453.6">1 Pound (453g)</option>
+        </select>
+      </div>
+
+      <!-- Ships To State -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-400 uppercase">Ships To State</label>
+        <select id="stateFilter" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none">
+          <option value="ALL">All States</option>
+          <option value="TX">Texas (TX)</option>
+          <option value="FL">Florida (FL)</option>
+          <option value="NC">North Carolina (NC)</option>
+          <option value="CA">California (CA)</option>
+          <option value="NY">New York (NY)</option>
+          <option value="GA">Georgia (GA)</option>
+          <option value="TN">Tennessee (TN)</option>
+          <option value="OH">Ohio (OH)</option>
+        </select>
+      </div>
+
+      <!-- Strain Category -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-400 uppercase">Strain</label>
+        <select id="strainFilter" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none">
+          <option value="ALL">All Strains</option>
+          <option value="Indica">Indica</option>
+          <option value="Sativa">Sativa</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+      </div>
+
+      <!-- Sort Options -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-400 uppercase">Sort By</label>
+        <select id="sortSelect" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-sm font-semibold text-emerald-400 focus:outline-none">
+          <option value="ppg_asc">Price/Gram: Low → High</option>
+          <option value="ppg_desc">Price/Gram: High → Low</option>
+          <option value="savings_desc">Highest % Below Market</option>
+          <option value="thca_desc">THCA%: High → Low</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-xl shadow-2xl">
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider bg-slate-950/60">
+            <th class="py-3 px-4">Strain / Product</th>
+            <th class="py-3 px-4">Grade & Type</th>
+            <th class="py-3 px-4">Weight</th>
+            <th class="py-3 px-4">THCA%</th>
+            <th class="py-3 px-4">Vendor</th>
+            <th class="py-3 px-4 text-emerald-400">Price/Gram</th>
+            <th class="py-3 px-4">Total</th>
+            <th class="py-3 px-4">Savings</th>
+            <th class="py-3 px-4 text-center">Deal</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-slate-800/80">
+          <tr><td colspan="9" class="text-center py-10 text-slate-500">Loading catalog...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    let rawData = [];
+    let activeGrade = 'ALL';
+    let gradeMedians = {};
+
+    const GRADES = ['Indoor', 'Exotic', 'Greenhouse', 'Outdoor', 'Smalls', 'Shake', 'Concentrates'];
+
+    // Baseline preview seed in case prices.json is loading
+    const previewData = [
+      {
+        product_name: "Grandaddy Purple (Trim/Shake)",
+        vendor: "Thca4cheap",
+        grade: "Shake",
+        strain_type: "Indica",
+        thca_percentage: 24.2,
+        coupon_code: "puffpricer",
+        coupon_discount_percent: 10,
+        restricted_states: ["ID", "SD"],
+        product_url: "#",
+        sizes: [
+          { size_label: "Half Pound (226g)", weight_grams: 226.8, price: 70.00 },
+          { size_label: "1 Pound (453g)", weight_grams: 453.6, price: 100.00 }
+        ]
+      },
+      {
+        product_name: "Midnight Bloom Exotic",
+        vendor: "Flow Gardens",
+        grade: "Exotic",
+        strain_type: "Hybrid",
+        thca_percentage: 29.8,
+        coupon_code: "FLOW15",
+        coupon_discount_percent: 15,
+        restricted_states: ["ID", "HI"],
+        product_url: "#",
+        sizes: [
+          { size_label: "Eighth (3.5g)", weight_grams: 3.5, price: 29.99 },
+          { size_label: "Ounce (28g)", weight_grams: 28.0, price: 140.00 }
+        ]
+      },
+      {
+        product_name: "Super Boof (Premium Indoor)",
+        vendor: "Arete Hemp",
+        grade: "Indoor",
+        strain_type: "Sativa Hybrid",
+        thca_percentage: 28.1,
+        coupon_code: "PUFF10",
+        coupon_discount_percent: 10,
+        restricted_states: ["ID", "MS"],
+        product_url: "#",
+        sizes: [
+          { size_label: "Eighth (3.5g)", weight_grams: 3.5, price: 25.00 },
+          { size_label: "Ounce (28g)", weight_grams: 28.0, price: 125.00 }
+        ]
+      }
+    ];
+
+    async function loadData() {
+      try {
+        const res = await fetch('prices.json');
+        rawData = await res.json();
+      } catch (e) {
+        rawData = previewData;
+      }
+      calculateGradeMedians();
+      buildGradePills();
+      render();
+    }
+
+    function calculateGradeMedians() {
+      const grouped = {};
+      rawData.forEach(item => {
+        const g = item.grade || 'Other';
+        if (!grouped[g]) grouped[g] = [];
+        item.sizes.forEach(sz => {
+          grouped[g].push(sz.price / sz.weight_grams);
+        });
+      });
+
+      for (let g in grouped) {
+        const sorted = grouped[g].sort((a,b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        gradeMedians[g] = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+      }
+    }
+
+    function buildGradePills() {
+      const container = document.getElementById('gradePillContainer');
+      container.innerHTML = '';
+
+      const allBtn = document.createElement('button');
+      allBtn.className = `px-3 py-1.5 text-xs font-bold rounded-lg transition ${activeGrade === 'ALL' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-slate-300'}`;
+      allBtn.innerText = 'All Grades';
+      allBtn.onclick = () => selectGrade('ALL');
+      container.appendChild(allBtn);
+
+      GRADES.forEach(g => {
+        let minPPG = Infinity;
+        rawData.filter(i => i.grade && i.grade.toLowerCase() === g.toLowerCase()).forEach(i => {
+          i.sizes.forEach(s => {
+            const ppg = s.price / s.weight_grams;
+            if (ppg < minPPG) minPPG = ppg;
+          });
+        });
+
+        const btn = document.createElement('button');
+        const isActive = activeGrade.toLowerCase() === g.toLowerCase();
+        btn.className = `px-3 py-1.5 text-xs font-semibold rounded-lg transition border ${isActive ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'}`;
+        
+        const priceSuffix = minPPG !== Infinity ? ` <span class="font-normal opacity-70">from $${minPPG.toFixed(2)}/g</span>` : '';
+        btn.innerHTML = `${g}${priceSuffix}`;
+        btn.onclick = () => selectGrade(g);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectGrade(grade) {
+      activeGrade = grade;
+      buildGradePills();
+      render();
+    }
+
+    function copyCode(code) {
+      navigator.clipboard.writeText(code);
+      const toast = document.getElementById('toast');
+      toast.innerText = `Copied "${code}" to clipboard!`;
+      toast.classList.remove('opacity-0', 'translate-y-20');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-20');
+      }, 2000);
+    }
+
+    function render() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const weight = document.getElementById('weightFilter').value;
+      const state = document.getElementById('stateFilter').value;
+      const strain = document.getElementById('strainFilter').value;
+      const sort = document.getElementById('sortSelect').value;
+      const applyCoupon = document.getElementById('applyCoupons').checked;
+
+      let rows = [];
+      rawData.forEach(item => {
+        if (state !== 'ALL' && item.restricted_states && item.restricted_states.includes(state)) {
+          return;
+        }
+
+        item.sizes.forEach(sz => {
+          if (weight !== 'ALL') {
+            const targetWeight = parseFloat(weight);
+            if (Math.abs(sz.weight_grams - targetWeight) > 1.2 && (sz.weight_grams < targetWeight * 0.95 || sz.weight_grams > targetWeight * 1.05)) {
+              return;
+            }
+          }
+
+          const discount = (applyCoupon && item.coupon_discount_percent) ? item.coupon_discount_percent : 0;
+          const finalPrice = sz.price * (1 - discount / 100);
+          const ppg = finalPrice / sz.weight_grams;
+
+          const categoryMedian = gradeMedians[item.grade] || ppg;
+          const savingPercent = Math.round(((categoryMedian - ppg) / categoryMedian) * 100);
+
+          rows.push({
+            ...item,
+            activeTier: sz,
+            effectivePrice: finalPrice,
+            effectivePPG: ppg,
+            savingPercent: savingPercent
+          });
+        });
+      });
+
+      let filtered = rows.filter(r => {
+        const matchesGrade = (activeGrade === 'ALL') || (r.grade.toLowerCase() === activeGrade.toLowerCase());
+        const matchesSearch = r.product_name.toLowerCase().includes(search) || r.vendor.toLowerCase().includes(search);
+        const matchesStrain = (strain === 'ALL') || (r.strain_type && r.strain_type.toLowerCase().includes(strain.toLowerCase()));
+        return matchesGrade && matchesSearch && matchesStrain;
+      });
+
+      filtered.sort((a, b) => {
+        if (sort === 'ppg_asc') return a.effectivePPG - b.effectivePPG;
+        if (sort === 'ppg_desc') return b.effectivePPG - a.effectivePPG;
+        if (sort === 'thca_desc') return (b.thca_percentage || 0) - (a.thca_percentage || 0);
+        if (sort === 'savings_desc') return b.savingPercent - a.savingPercent;
+        return 0;
+      });
+
+      document.getElementById('statsBadge').innerText = `${filtered.length} listings`;
+
+      const tbody = document.getElementById('tableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-slate-500">No THCA listings match the current filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="py-3 px-4 font-semibold text-slate-100">
+            ${item.product_name}
+            ${item.coupon_code ? `
+              <button onclick="copyCode('${item.coupon_code}')" title="Click to copy coupon code" class="ml-1.5 inline-flex items-center gap-1 text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.5 rounded font-mono hover:bg-emerald-900 transition">
+                <span>Code: ${item.coupon_code}</span>
+                <span class="text-emerald-500">📋</span>
+              </button>
+            ` : ''}
+          </td>
+          <td class="py-3 px-4">
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${item.grade}</span>
+            ${item.strain_type ? `<span class="text-xs text-slate-400 ml-1">(${item.strain_type})</span>` : ''}
+          </td>
+          <td class="py-3 px-4 text-slate-300 font-medium">${item.activeTier.size_label}</td>
+          <td class="py-3 px-4 text-slate-300">${item.thca_percentage ? item.thca_percentage + '%' : '—'}</td>
+          <td class="py-3 px-4 text-slate-400 font-medium">${item.vendor}</td>
+          <td class="py-3 px-4 font-extrabold text-emerald-400 text-base">
+            $${item.effectivePPG.toFixed(2)}<span class="text-xs font-normal text-slate-400">/g</span>
+          </td>
+          <td class="py-3 px-4 text-slate-200 font-medium">
+            $${item.effectivePrice.toFixed(2)}
+            ${item.effectivePrice < item.activeTier.price ? `<span class="line-through text-xs text-slate-500 block">$${item.activeTier.price.toFixed(2)}</span>` : ''}
+          </td>
+          <td class="py-3 px-4">
+            ${item.savingPercent > 0 ? `
+              <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-900 px-2 py-0.5 rounded">
+                ${item.savingPercent}% below avg
+              </span>
+            ` : `<span class="text-xs text-slate-500">Market Avg</span>`}
+          </td>
+          <td class="py-3 px-4 text-center">
+            <a href="${item.product_url || '#'}" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded transition inline-block">
+              Get Deal ↗
+            </a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    ['searchInput', 'weightFilter', 'stateFilter', 'strainFilter', 'sortSelect', 'applyCoupons'].forEach(id => {
+      document.getElementById(id).addEventListener('change', render);
+      document.getElementById(id).addEventListener('input', render);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>

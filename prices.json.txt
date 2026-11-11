@@ -1,0 +1,74 @@
+[
+  {
+    "product_name": "Grandaddy Purple (Trim/Shake)",
+    "vendor": "Thca4cheap",
+    "grade": "Shake",
+    "strain_type": "Indica",
+    "thca_percentage": 24.2,
+    "coupon_code": "puffpricer",
+    "coupon_discount_percent": 10,
+    "restricted_states": ["ID", "SD"],
+    "product_url": "https://example.com/gdp",
+    "sizes": [
+      {
+        "size_label": "Half Pound (226g)",
+        "weight_grams": 226.8,
+        "price": 70.0
+      },
+      {
+        "size_label": "1 Pound (453g)",
+        "weight_grams": 453.6,
+        "price": 100.0
+      }
+    ],
+    "last_updated": "2026-11-10 18:00 UTC"
+  },
+  {
+    "product_name": "Midnight Bloom Exotic",
+    "vendor": "Flow Gardens",
+    "grade": "Exotic",
+    "strain_type": "Hybrid",
+    "thca_percentage": 29.8,
+    "coupon_code": "FLOW15",
+    "coupon_discount_percent": 15,
+    "restricted_states": ["ID", "HI"],
+    "product_url": "https://example.com/midnight",
+    "sizes": [
+      {
+        "size_label": "Eighth (3.5g)",
+        "weight_grams": 3.5,
+        "price": 29.99
+      },
+      {
+        "size_label": "Ounce (28g)",
+        "weight_grams": 28.0,
+        "price": 140.0
+      }
+    ],
+    "last_updated": "2026-11-10 18:00 UTC"
+  },
+  {
+    "product_name": "Super Boof (Premium Indoor)",
+    "vendor": "Arete Hemp",
+    "grade": "Indoor",
+    "strain_type": "Sativa Hybrid",
+    "thca_percentage": 28.1,
+    "coupon_code": "PUFF10",
+    "coupon_discount_percent": 10,
+    "restricted_states": ["ID", "MS"],
+    "product_url": "https://example.com/superboof",
+    "sizes": [
+      {
+        "size_label": "Eighth (3.5g)",
+        "weight_grams": 3.5,
+        "price": 25.0
+      },
+      {
+        "size_label": "Ounce (28g)",
+        "weight_grams": 28.0,
+        "price": 125.0
+      }
+    ],
+    "last_updated": "2026-11-10 18:00 UTC"
+  }
+]
